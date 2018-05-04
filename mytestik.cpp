@@ -9,14 +9,15 @@ void print(big_integer const& a) {
 }
 
 int main() {
-    big_integer a, b;
-    a.number = {1, 2, 3};
-    b.number = {5, 6};
-    a.negative = false;
-    b.negative = false;
+    big_integer a = 4;
+    big_integer b = 7;
+    (a = b) = a;
 
-    a *= b;
+    if (a == 7) {
+        std::cout << "a == 7\n";
+    }
 
-    print(a);
-    print(b);
+    if (b == 7) {
+        std::cout << "b == 7\n";
+    }
 }

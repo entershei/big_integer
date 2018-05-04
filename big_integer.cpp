@@ -7,19 +7,20 @@
 
 #include "big_integer.h"
 
-//const uint32_t MAX_UINT_32 = std::numeric_limits<uint32_t>::max();
-const uint32_t MAX_UINT_32 = 15;
+const uint32_t MAX_UINT_32 = std::numeric_limits<uint32_t>::max();
 const uint64_t BASE = static_cast<uint64_t>(MAX_UINT_32) + 1;
-const uint32_t SHIFT_32 = 4;
-//const uint32_t SHIFT_32 = 32;
-//const uint32_t HALF_MAX = BASE / 2;
+//const uint32_t MAX_UINT_32 = 15;
+//const uint32_t SHIFT_32 = 4;
+const uint32_t SHIFT_32 = 32;
+const uint32_t MAX_POW_10 = static_cast<uint32_t >(1e9);
+const big_integer TEN = MAX_POW_10;
 
 big_integer::big_integer() :
         number({0}),
         negative(false) {}
 
 uint32_t big_integer::abs_for_int32(int32_t a) {
-    if (a == std::numeric_limits<uint32_t>::min()) {
+    if (a == std::numeric_limits<int32_t>::min()) {
         return static_cast<uint32_t>(1) << static_cast<uint32_t>(31);
     }
 
@@ -73,20 +74,20 @@ big_integer &big_integer::operator=(big_integer other) {
 }
 
 void big_integer::small_add(size_t pos, uint64_t add, uint32_t &carry) {
-    uint64_t res = static_cast<uint64_t>(this->number[pos] + add + carry);
-    this->number[pos] = static_cast<uint32_t>(res & MAX_UINT_32);
+    uint64_t res = static_cast<uint64_t>(number[pos] + add + carry);
+    number[pos] = static_cast<uint32_t>(res & MAX_UINT_32);
     carry = static_cast<uint32_t>(res >> SHIFT_32);
 }
 
 big_integer &big_integer::add(big_integer const &rhs) { // Сложение беззнаковое
-    number.resize(std::max(this->number.size(), rhs.number.size()), 0);
+    number.resize(std::max(number.size(), rhs.number.size()), 0);
     uint32_t carry = 0;
 
     for (size_t i = 0; i < rhs.number.size(); ++i) {
         small_add(i, rhs.number[i], carry);
     }
 
-    for (size_t i = rhs.number.size(); i < this->number.size(); ++i) {
+    for (size_t i = rhs.number.size(); i < number.size(); ++i) {
         small_add(i, 0, carry);
     }
 
@@ -101,7 +102,7 @@ big_integer &big_integer::subtraction_larger(big_integer const &rhs) { // Выч
     int64_t borrow = 0;
 
     for (size_t i = 0; i < rhs.number.size(); ++i) {
-        int64_t res = static_cast<int64_t >(this->number[i]) - borrow;
+        int64_t res = static_cast<int64_t >(number[i]) - borrow;
 
         if (res < rhs.number[i]) {
             res += BASE - rhs.number[i];
@@ -111,18 +112,18 @@ big_integer &big_integer::subtraction_larger(big_integer const &rhs) { // Выч
             borrow = 0;
         }
 
-        this->number[i] = static_cast<uint32_t >(res);
+        number[i] = static_cast<uint32_t >(res);
     }
 
-    for (size_t i = rhs.number.size(); i < this->number.size(); ++i) {
+    for (size_t i = rhs.number.size(); i < number.size(); ++i) {
         if (borrow == 0) {
             break;
         }
 
-        if (this->number[i] == 0) {
-            this->number[i] = MAX_UINT_32;
+        if (number[i] == 0) {
+            number[i] = MAX_UINT_32;
         } else {
-            --this->number[i];
+            --number[i];
             break;
         }
     }
@@ -156,51 +157,50 @@ bool more_or_equal(big_integer const &a, big_integer const &b) { // |a| >= |b|
 
 big_integer &big_integer::subtraction(big_integer const &rhs) { // Вычитание беззнаковое (почти)
     if (more_or_equal(*this, rhs)) {
-        this->subtraction_larger(rhs);
+        subtraction_larger(rhs);
     } else {
-        this->subtraction_less(rhs);
-        this->negative ^= 1;
+        subtraction_less(rhs);
+        negative ^= 1;
     }
 
     return *this;
 }
 
 big_integer &big_integer::operator+=(big_integer const &rhs) { // Сложение
-    if (this->negative == rhs.negative) {
-        this->add(rhs);
+    if (negative == rhs.negative) {
+        add(rhs);
     } else {
-        this->subtraction(rhs);
+        subtraction(rhs);
     }
 
     return *this;
 }
 
 big_integer &big_integer::operator-=(big_integer const &rhs) { // Вычитание
-    if (this->negative == rhs.negative) {
-        this->subtraction(rhs);
+    if (negative == rhs.negative) {
+        subtraction(rhs);
     } else {
-        this->add(rhs);
+        add(rhs);
     }
 
     return *this;
 }
 
 uint32_t big_integer::insert_or_add(size_t pos, uint64_t x) {
-    this->number.resize(std::max(this->number.size(), pos + 1), 0);
+    number.resize(std::max(number.size(), pos + 1), 0);
 
-    uint64_t ret = this->number[pos] + x;
-    this->number[pos] = static_cast<uint32_t >(ret & MAX_UINT_32);
+    uint64_t ret = number[pos] + x;
+    number[pos] = static_cast<uint32_t >(ret & MAX_UINT_32);
     return static_cast<uint32_t>(ret >> SHIFT_32);
 }
 
 big_integer &big_integer::operator*=(big_integer const &rhs) {
     big_integer ret = 0;
 
-
     for (size_t i = 0; i < rhs.number.size(); ++i) {
         uint32_t carry = 0;
-        for (size_t j = 0; j < this->number.size(); ++j) {
-            uint64_t mul = static_cast<uint64_t >(rhs.number[i]) * this->number[j];
+        for (size_t j = 0; j < number.size(); ++j) {
+            uint64_t mul = static_cast<uint64_t >(rhs.number[i]) * number[j];
             carry = ret.insert_or_add(i + j, mul + carry);
         }
         if (carry != 0) {
@@ -209,9 +209,7 @@ big_integer &big_integer::operator*=(big_integer const &rhs) {
         }
     }
 
-
-
-    ret.negative = this->negative ^ rhs.negative;
+    ret.negative = negative ^ rhs.negative;
     ret.delete_zeroes();
 
     *this = ret;
@@ -219,7 +217,7 @@ big_integer &big_integer::operator*=(big_integer const &rhs) {
     return *this;
 }
 
-big_integer &big_integer::normalization(big_integer const &rhs) {
+big_integer big_integer::normalization(big_integer const &rhs) {
     big_integer new_rhs = rhs;
     int64_t multiplier = BASE / (rhs.number.back() + 1);
 
@@ -230,12 +228,12 @@ big_integer &big_integer::normalization(big_integer const &rhs) {
 }
 
 big_integer &big_integer::delete_zeroes() {
-    while (this->number.size() > 1 && this->number.back() == 0) {
-        this->number.pop_back();
+    while (number.size() > 1 && number.back() == 0) {
+        number.pop_back();
     }
 
-    if (this->number.size() == 1 && this->number.back() == 0) {
-        this->negative = false;
+    if (number.size() == 1 && number.back() == 0) {
+        negative = false;
     }
 
     return *this;
@@ -243,11 +241,11 @@ big_integer &big_integer::delete_zeroes() {
 
 big_integer big_integer::quotient(uint32_t b) {
     big_integer ret = 0;
-    ret.number.resize(this->number.size());
+    ret.number.resize(number.size());
     uint32_t carry = 0;
 
-    for (size_t i = this->number.size(); i-- > 0;) {
-        uint64_t cur = carry * BASE + this->number[i];
+    for (size_t i = number.size(); i-- > 0;) {
+        uint64_t cur = carry * BASE + number[i];
         ret.number[i] = static_cast<uint32_t >(cur / b);
         carry = static_cast<uint32_t>(cur % b);
     }
@@ -260,8 +258,8 @@ big_integer big_integer::remainder(uint32_t b) {
     big_integer ret = 0;
     uint64_t carry = 0;
 
-    for (size_t i = this->number.size(); i-- > 0;) {
-        carry = (carry * BASE + this->number[i]) % b;
+    for (size_t i = number.size(); i-- > 0;) {
+        carry = (carry * BASE + number[i]) % b;
     }
 
     ret = carry;
@@ -269,7 +267,7 @@ big_integer big_integer::remainder(uint32_t b) {
 }
 
 uint32_t big_integer::divide(uint32_t h, uint32_t &l, uint32_t b) {
-    uint64_t a = (h << SHIFT_32) | l;
+    uint64_t a = (static_cast<uint64_t>(h) << SHIFT_32) | l;
     uint32_t ret = a % b;
     l = a / b;
 
@@ -295,7 +293,7 @@ uint32_t trial(big_integer const &a, big_integer const &b, size_t pos) {
     if (b2.number[1] > a3.number[2]) {
         uint32_t cur = a3.number[2];
         test = a3.number[1];
-        cur = divide(cur, test, b2.number[1]);
+        cur = big_integer::divide(cur, test, b2.number[1]);
     } else {
         test = MAX_UINT_32;
     }
@@ -327,6 +325,8 @@ bool big_integer::shift_larger(big_integer const &first, big_integer const &seco
             return first.number[i] > cur;
         }
     }
+
+    return true;
 }
 
 big_integer &big_integer::shift_subtraction(big_integer const &rhs, size_t shift) {
@@ -334,7 +334,7 @@ big_integer &big_integer::shift_subtraction(big_integer const &rhs, size_t shift
     int64_t borrow = 0;
 
     for (size_t i = 0; i < finish; ++i) {
-        int64_t res = static_cast<int64_t >(this->number[i]) - borrow;
+        int64_t res = static_cast<int64_t >(number[i]) - borrow;
 
         if (res < rhs.number[i + shift]) {
             res += BASE - rhs.number[i + shift];
@@ -344,11 +344,11 @@ big_integer &big_integer::shift_subtraction(big_integer const &rhs, size_t shift
             borrow = 0;
         }
 
-        this->number[i] = static_cast<uint32_t >(res);
+        number[i] = static_cast<uint32_t >(res);
     }
 
     if (borrow > 0) {
-        this->number.back() -= 1;
+        number.back() -= 1;
     }
 
     return *this;
@@ -356,11 +356,11 @@ big_integer &big_integer::shift_subtraction(big_integer const &rhs, size_t shift
 }
 
 std::pair<big_integer &, big_integer &> big_integer::long_division(big_integer rhs) {
-    this->number.push_back(0);
+    number.push_back(0);
     big_integer ret;
-    ret.number.resize(this->number.size() - rhs.number.size(), 0);
+    ret.number.resize(number.size() - rhs.number.size(), 0);
 
-    rhs = this->normalization(rhs);
+    rhs = normalization(rhs);
 
     for (size_t i = ret.number.size(); i-- > 0;) {
         uint32_t cur = trial(*this, rhs, rhs.number.size() + i);
@@ -373,9 +373,9 @@ std::pair<big_integer &, big_integer &> big_integer::long_division(big_integer r
         }
 
         ret.number[i] = cur;
-        this->shift_subtraction(test, i);
+        shift_subtraction(test, i);
 
-        if (this->number.empty()) {
+        if (number.empty()) {
             break;
         }
     }
@@ -401,13 +401,13 @@ std::pair<big_integer &, big_integer &> big_integer::long_division(big_integer r
 
 //std::pair<big_integer&, big_integer&> big_integer::long_division(big_integer const &rhs) {
 //    big_integer ret = 0;
-//    ret.number.resize(this->number.size() - rhs.number.size() + 1 , 0);
+//    ret.number.resize(number.size() - rhs.number.size() + 1 , 0);
 //
 //    uint64_t carry = 0;
 //    size_t ind_rhs = rhs.number.size() - 1;
 //
 //    for (size_t i = ret.number.size(); i-- > 0;) {
-//        ret.number[i] = bin_search(this->number[i + rhs.number.size() - 1], rhs.number[ind_rhs], carry);
+//        ret.number[i] = bin_search(number[i + rhs.number.size() - 1], rhs.number[ind_rhs], carry);
 //
 //        if (ret.number[i] != 0) {
 //            ++ind_rhs;
@@ -428,13 +428,13 @@ std::pair<big_integer, big_integer> big_integer::division_with_remainder(big_int
     if (rhs.number.size() == 1) {
         assert(rhs.number.back() != 0);
 
-        return {this->quotient(rhs.number.back()), this->remainder(rhs.number.back())};
+        return {quotient(rhs.number.back()), remainder(rhs.number.back())};
     } else {
-        if (this->number.size() < rhs.number.size()) {
+        if (number.size() < rhs.number.size()) {
             big_integer ret_f = big_integer(0);
             return {ret_f, *this};
         } else {
-            return this->long_division(rhs);
+            return long_division(rhs);
         }
     }
 }
@@ -443,12 +443,15 @@ big_integer &big_integer::operator/=(big_integer const &rhs) {
     std::pair<big_integer, big_integer> div_and_rem = division_with_remainder(rhs);
 
     *this = div_and_rem.first;
-    this->negative = (this->negative != rhs.negative);
+    negative = (negative != rhs.negative);
     return *this;
 }
 
 big_integer &big_integer::operator%=(big_integer const &rhs) {
-    throw std::runtime_error("oh-oh");
+    std::pair<big_integer, big_integer> div_and_rem = division_with_remainder(rhs);
+
+    *this = div_and_rem.second;
+    return *this;
 }
 
 std::vector<uint32_t> big_integer::get_twos_complement(size_t size) const {
@@ -471,7 +474,6 @@ big_integer &big_integer::operator&=(big_integer const &rhs) {
     }
     *this = big_integer(a);
 
-    delete_zeroes();
     return *this;
 }
 
@@ -485,7 +487,6 @@ big_integer &big_integer::operator|=(big_integer const &rhs) {
     }
     *this = big_integer(a);
 
-    delete_zeroes();
     return *this;
 }
 
@@ -499,35 +500,45 @@ big_integer &big_integer::operator^=(big_integer const &rhs) {
     }
     *this = big_integer(a);
 
-    delete_zeroes();
     return *this;
 }
 
+big_integer big_integer::operator~() const {
+    size_t size = number.size() + 1;
+    std::vector<uint32_t> a = get_twos_complement(size);
+
+    for (size_t i = 0; i < a.size(); ++i) {
+        a[i] = ~a[i];
+    }
+
+    return big_integer(a);
+}
+
 big_integer &big_integer::operator<<=(size_t shift) {
-    !!!
+    //todo
+    throw new std::runtime_error("oh-oh");
     std::vector<uint32_t> a = get_twos_complement(number.size());
 
-    std::vector ret(a.size() + shift, 0);
+    std::vector<uint32_t> ret(a.size() + shift, 0);
     for (size_t i = shift; i < ret.size(); ++i) {
         ret[i] = a[i - shift];
     }
 
     *this = big_integer(a);
 
-    delete_zeroes();
     return *this;
 }
 
 big_integer &big_integer::operator>>=(size_t shift) {
-    !!!
+    //todo
+    throw new std::runtime_error("oh-oh");
     std::vector<uint32_t> a = get_twos_complement(number.size());
 
-    std::vector ret = a;
+    std::vector<uint32_t> ret = a;
     ret.resize(a.size() + shift, 0);
 
     *this = big_integer(a);
 
-    delete_zeroes();
     return *this;
 }
 
@@ -541,10 +552,6 @@ big_integer big_integer::operator-() const {
     ret.delete_zeroes();
 
     return ret;
-}
-
-big_integer big_integer::operator~() const {
-    throw std::runtime_error("oh-oh");
 }
 
 big_integer &big_integer::operator++() { // Инкремент префиксный
@@ -587,7 +594,7 @@ big_integer operator/(big_integer a, big_integer const &b) {
 }
 
 big_integer operator%(big_integer a, big_integer const &b) {
-    throw std::runtime_error("oh-oh");
+    return a %= b;
 }
 
 big_integer operator&(big_integer a, big_integer const &b) {
@@ -638,7 +645,31 @@ bool operator>=(big_integer const &a, big_integer const &b) {
 }
 
 std::string to_string(big_integer const &a) {
-    throw std::runtime_error("oh-oh");
+    if (a.number.size() == 1) {
+        return (a.negative ? "-" : "") + std::to_string(a.number[0]);
+    }
+
+    big_integer dividend = a;
+    dividend.negative = false;
+
+    std::vector<std::string> ret;
+    ret.clear();
+
+    big_integer quotient;
+    while (dividend > 0) {
+        quotient = dividend % TEN;
+        dividend /= TEN;
+        ret.push_back(std::to_string(quotient.number[0]));
+    }
+
+    std::reverse(ret.begin(), ret.end());
+    std::string string_of_big_integer;
+
+    for (auto i : ret) {
+        string_of_big_integer += i;
+    }
+
+    return string_of_big_integer;
 }
 
 std::ostream &operator<<(std::ostream &s, big_integer const &a) {
