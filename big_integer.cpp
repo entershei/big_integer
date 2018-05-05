@@ -101,13 +101,13 @@ big_integer &big_integer::subtraction_larger(big_integer const &rhs) { // Выч
     int64_t borrow = 0;
 
     for (size_t i = 0; i < rhs.number.size(); ++i) {
-        int64_t res = static_cast<int64_t >(number[i]) - borrow;
+        int64_t res = number[i];
 
-        if (res < rhs.number[i]) {
-            res += BASE - rhs.number[i];
+        if (res < rhs.number[i] + borrow) {
+            res += BASE - rhs.number[i] - borrow;
             borrow = 1;
         } else {
-            res -= rhs.number[i];
+            res -= rhs.number[i] + borrow;
             borrow = 0;
         }
 
@@ -258,21 +258,21 @@ big_integer big_integer::remainder(uint32_t b) {
 }
 
 void big_integer::shift_subtract(big_integer const &rhs, size_t pos) {
-    uint32_t borrow = 0;
+    uint64_t borrow = 0;
     for (size_t i = pos; i < std::min(number.size(), rhs.number.size() + pos); ++i) {
-        uint32_t res = number[pos] - borrow;
+        uint64_t res = number[i];
 
         size_t pos_rhs = (i - pos < rhs.number.size()) ? i - pos : 0;
 
-        if (res <  rhs.number[pos_rhs]) {
+        if (res <  rhs.number[pos_rhs] + borrow) {
+            res = BASE - rhs.number[pos_rhs] - borrow;
             borrow = 1;
-            res = MAX_UINT_32;
         } else {
+            res -= rhs.number[pos_rhs] + borrow;
             borrow = 0;
-            res -= rhs.number[pos_rhs];
         }
 
-        number[i - pos] = res;
+        number[i - pos] = static_cast<uint32_t >(res);
     }
 
     delete_zeroes();
