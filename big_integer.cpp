@@ -272,7 +272,7 @@ void big_integer::shift_subtract(big_integer const &rhs, size_t pos) {
             borrow = 0;
         }
 
-        number[i - pos] = static_cast<uint32_t >(res);
+        number[i] = static_cast<uint32_t>(res);
     }
 
     delete_zeroes();
