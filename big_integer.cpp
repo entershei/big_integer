@@ -31,6 +31,11 @@ big_integer::big_integer(int32_t a) {
     negative = a < 0;
 }
 
+big_integer::big_integer(uint32_t a) {
+    number = {a};
+    negative = false;
+}
+
 big_integer::big_integer(std::string const &str) {
     size_t start = 0;
     negative = false;
@@ -212,15 +217,6 @@ big_integer &big_integer::operator*=(big_integer const &rhs) {
     return *this;
 }
 
-big_integer big_integer::normalization(big_integer const &rhs) {
-    big_integer new_rhs = rhs;
-    int64_t multiplier = BASE / (rhs.number.back() + 1);
-
-    *this *= multiplier;
-    new_rhs *= multiplier;
-
-    return new_rhs;
-}
 
 big_integer &big_integer::delete_zeroes() {
     while (number.size() > 1 && number.back() == 0) {
@@ -257,21 +253,23 @@ big_integer big_integer::remainder(uint32_t b) {
         carry = (carry * BASE + number[i]) % b;
     }
 
-    ret = carry;
+    ret = static_cast<uint32_t >(carry);
     return ret;
 }
 
 void big_integer::shift_subtract(big_integer const &rhs, size_t pos) {
     uint32_t borrow = 0;
-    for (size_t i = pos; i < number.size(); ++i) {
+    for (size_t i = pos; i < std::min(number.size(), rhs.number.size() + pos); ++i) {
         uint32_t res = number[pos] - borrow;
 
-        if (res <  rhs.number[i - pos]) {
+        size_t pos_rhs = (i - pos < rhs.number.size()) ? i - pos : 0;
+
+        if (res <  rhs.number[pos_rhs]) {
             borrow = 1;
             res = MAX_UINT_32;
         } else {
             borrow = 0;
-            res -= rhs.number[i - pos];
+            res -= rhs.number[pos_rhs];
         }
 
         number[i - pos] = res;
@@ -282,12 +280,12 @@ void big_integer::shift_subtract(big_integer const &rhs, size_t pos) {
 
 bool big_integer::shift_leq(big_integer const& rhs, size_t pos) {
     if (pos + rhs.number.size() != number.size()) {
-        return number.size() < pos + rhs.number.size();
+        return number.size() > pos + rhs.number.size();
     }
 
     for (size_t i = number.size(); i-- >  pos;) {
         if (number[i] != rhs.number[i - pos]) {
-            return number[i] <= rhs.number[i - pos];
+            return number[i] > rhs.number[i - pos];
         }
     }
 
@@ -302,10 +300,10 @@ uint32_t big_integer::bin_search(big_integer const &rhs, size_t pos) {
 
         big_integer debug = rhs * middle;
 
-        if (!shift_leq(rhs * middle, pos)) {
-            right = middle;
-        } else {
+        if (shift_leq(rhs * middle, pos)) {
             left = middle;
+        } else {
+            right = middle;
         }
     }
 
@@ -318,7 +316,7 @@ std::pair<big_integer&, big_integer&> big_integer::long_division(big_integer con
     ret.number.resize(number.size() - rhs.number.size() + 1, 0);
 
     for (size_t i = ret.number.size(); i-- > 0;) {
-        ret.number[i] = bin_search(rhs, i);
+        ret.number[i] = dividend.bin_search(rhs, i);
         dividend.shift_subtract(ret.number[i] * rhs, i);
     }
 

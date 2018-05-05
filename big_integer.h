@@ -10,6 +10,7 @@ struct big_integer
     big_integer();
     big_integer(big_integer const& other) = default;
     big_integer(int32_t a);
+    big_integer(uint32_t a);
     explicit big_integer(std::string const& str);
     ~big_integer() = default;
 
