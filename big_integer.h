@@ -70,7 +70,7 @@ private:
     //big_integer& reverse();
     uint32_t bin_search(big_integer const &rhs, size_t pos);
     std::pair<big_integer, big_integer> division_with_remainder(big_integer const& rhs);
-    std::pair<big_integer&, big_integer&> long_division(big_integer const& rhs);
+    std::pair<big_integer, big_integer> long_division(big_integer const& rhs);
     uint32_t abs_for_int32(int32_t a);
     uint32_t insert_or_add(size_t pos, uint64_t x);
     std::vector<uint32_t> negate(std::vector<uint32_t> const& v) const;

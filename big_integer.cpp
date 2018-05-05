@@ -9,8 +9,6 @@
 
 const uint32_t MAX_UINT_32 = std::numeric_limits<uint32_t>::max();
 const uint64_t BASE = static_cast<uint64_t>(MAX_UINT_32) + 1;
-//const uint32_t MAX_UINT_32 = 15;
-//const uint32_t SHIFT_32 = 4;
 const uint32_t SHIFT_32 = 32;
 const big_integer MAX_POW_10 = static_cast<uint32_t >(1e9);
 
@@ -310,7 +308,7 @@ uint32_t big_integer::bin_search(big_integer const &rhs, size_t pos) {
     return left;
 }
 
-std::pair<big_integer&, big_integer&> big_integer::long_division(big_integer const &rhs) { //беззнаковое
+std::pair<big_integer, big_integer> big_integer::long_division(big_integer const &rhs) { //беззнаковое
     big_integer dividend = *this;
     big_integer ret = 0;
     ret.number.resize(number.size() - rhs.number.size() + 1, 0);
@@ -421,7 +419,9 @@ big_integer &big_integer::operator<<=(size_t shift) {
 
     std::vector<uint32_t> ret(a.size() + (shift + SHIFT_32 - 1) / SHIFT_32, 0);
     for (size_t i = shift / SHIFT_32; i < ret.size(); ++i) {
-        ret[i] = a[i - shift / SHIFT_32];
+        if (i - shift / SHIFT_32 < a.size()) {
+            ret[i] = a[i - shift / SHIFT_32];
+        }
     }
 
     shift %= SHIFT_32;
@@ -446,7 +446,9 @@ big_integer &big_integer::operator>>=(size_t shift) {
     std::vector<uint32_t> ret(a.size() - shift / SHIFT_32, 0);
 
     for (size_t i = ret.size(); i-- > 0;) {
-        ret[i] = a[i + shift / SHIFT_32];
+        if (i + shift / SHIFT_32 < a.size()) {
+            ret[i] = a[i + shift / SHIFT_32];
+        }
     }
 
     shift %= SHIFT_32;
