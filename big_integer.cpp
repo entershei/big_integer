@@ -285,7 +285,7 @@ bool big_integer::shift_leq(big_integer const& rhs, size_t pos) {
         return number.size() < pos + rhs.number.size();
     }
 
-    for (size_t i = number.size(); i-- >  0;) {
+    for (size_t i = number.size(); i-- >  pos;) {
         if (number[i] != rhs.number[i - pos]) {
             return number[i] <= rhs.number[i - pos];
         }
@@ -295,14 +295,10 @@ bool big_integer::shift_leq(big_integer const& rhs, size_t pos) {
 }
 
 uint32_t big_integer::bin_search(big_integer const &rhs, size_t pos) {
-    if (shift_leq(rhs, pos)) {
-        return  0;
-    }
-
-    uint32_t left = 0, right = MAX_UINT_32;
+    uint64_t left = 0, right = BASE;
 
     while (right - left > 1) {
-        uint32_t middle = static_cast<uint32_t>((static_cast<uint64_t>(left) + right) / 2);
+        uint32_t middle = static_cast<uint32_t>((left + right) / 2);
 
         big_integer debug = rhs * middle;
 
@@ -313,7 +309,7 @@ uint32_t big_integer::bin_search(big_integer const &rhs, size_t pos) {
         }
     }
 
-    return right - 1;
+    return left;
 }
 
 std::pair<big_integer&, big_integer&> big_integer::long_division(big_integer const &rhs) { //беззнаковое
