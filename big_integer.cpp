@@ -260,146 +260,31 @@ big_integer big_integer::remainder(uint32_t b) {
     ret = carry;
     return ret;
 }
-/*
-uint32_t big_integer::divide(uint32_t h, uint32_t &l, uint32_t b) {
-    uint64_t a = (static_cast<uint64_t>(h) << SHIFT_32) | l;
-    uint32_t ret = a % b;
-    l = a / b;
-
-    return ret;
-}
-
-uint32_t trial(big_integer const &a, big_integer const &b, size_t pos) {
-    if (more_or_equal(b, a)) {
-        return 0;
-    }
-
-    big_integer a3(0);
-    a3.number = {a.number[pos - 2], a.number[pos - 1], static_cast<uint32_t >(0)};
-
-    if (pos != a.number.size()) {
-        a3.number.back() = a.number[pos];
-    }
-
-    big_integer b2(0);
-    b2.number = {b.number[pos - 1], b.number[pos]};
-    uint32_t test;
-
-    if (b2.number[1] > a3.number[2]) {
-        uint32_t cur = a3.number[2];
-        test = a3.number[1];
-        cur = big_integer::divide(cur, test, b2.number[1]);
-    } else {
-        test = MAX_UINT_32;
-    }
-    b2 *= test;
-    if (a3 < b2) {
-        --test;
-    }
-
-    return test;
-}
-
-bool big_integer::shift_larger(big_integer const &first, big_integer const &second, size_t shift) {
-    if (first.number.size() < second.number.size() + shift) {
-        return false;
-    }
-
-    if (first.number.size() > second.number.size() + shift) {
-        return true;
-    }
-
-    for (size_t i = first.number.size(); i-- > 0;) {
-        size_t pos = i - shift;
-        uint32_t cur = 0;
-
-        if (i >= 0) {
-            cur = second.number[pos];
-        }
-        if (first.number[i] != cur) {
-            return first.number[i] > cur;
-        }
-    }
-
-    return true;
-}
-
-big_integer &big_integer::shift_subtraction(big_integer const &rhs, size_t shift) {
-    size_t finish = rhs.number.size();
-    int64_t borrow = 0;
-
-    for (size_t i = 0; i < finish; ++i) {
-        int64_t res = static_cast<int64_t >(number[i]) - borrow;
-
-        if (res < rhs.number[i + shift]) {
-            res += BASE - rhs.number[i + shift];
-            borrow = 1;
-        } else {
-            res -= rhs.number[i + shift];
-            borrow = 0;
-        }
-
-        number[i] = static_cast<uint32_t >(res);
-    }
-
-    if (borrow > 0) {
-        number.back() -= 1;
-    }
-
-    return *this;
-
-}
-
-std::pair<big_integer &, big_integer &> big_integer::long_division(big_integer rhs) {
-    number.push_back(0);
-    big_integer ret;
-    ret.number.resize(number.size() - rhs.number.size(), 0);
-
-    rhs = normalization(rhs);
-
-    for (size_t i = ret.number.size(); i-- > 0;) {
-        uint32_t cur = trial(*this, rhs, rhs.number.size() + i);
-        big_integer test = rhs;
-        test *= cur;
-
-        if (shift_larger(*this, test, i)) {
-            --cur;
-            test -= rhs;
-        }
-
-        ret.number[i] = cur;
-        shift_subtraction(test, i);
-
-        if (number.empty()) {
-            break;
-        }
-    }
-
-    ret.delete_zeroes();
-
-    return {ret, *this};
-}
-*/
 
 void big_integer::shift_subtract(big_integer const &rhs, size_t pos) {
     uint32_t borrow = 0;
     for (size_t i = pos; i < number.size(); ++i) {
-        uint32_t res = number[pos] - borrow - rhs.number[i - pos];
+        uint32_t res = number[pos] - borrow;
 
-        if (res < 0) {
+        if (res <  rhs.number[i - pos]) {
             borrow = 1;
             res = MAX_UINT_32;
         } else {
             borrow = 0;
+            res -= rhs.number[i - pos];
         }
 
         number[i - pos] = res;
     }
 
-    number.resize(number.size() - pos);
+    delete_zeroes();
 }
 
 bool big_integer::shift_leq(big_integer const& rhs, size_t pos) {
+    if (pos + rhs.number.size() != number.size()) {
+        return number.size() < pos + rhs.number.size();
+    }
+
     for (size_t i = number.size(); i-- >  0;) {
         if (number[i] != rhs.number[i - pos]) {
             return number[i] <= rhs.number[i - pos];
@@ -410,8 +295,7 @@ bool big_integer::shift_leq(big_integer const& rhs, size_t pos) {
 }
 
 uint32_t big_integer::bin_search(big_integer const &rhs, size_t pos) {
-    std::cout << "!!\n";
-    if (!shift_leq(rhs, pos)) {
+    if (shift_leq(rhs, pos)) {
         return  0;
     }
 
