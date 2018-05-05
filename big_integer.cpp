@@ -418,7 +418,7 @@ uint32_t big_integer::bin_search(big_integer const &rhs, size_t pos) {
     uint32_t left = 0, right = MAX_UINT_32;
 
     while (right - left > 1) {
-        uint32_t middle = (left + right) / 2;
+        uint32_t middle = static_cast<uint32_t>((static_cast<uint64_t>(left) + right) / 2);
 
         big_integer debug = rhs * middle;
 
