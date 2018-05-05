@@ -39,8 +39,9 @@ big_integer::big_integer(std::string const &str) {
     negative = false;
     number = {0};
 
+    bool this_negative = false;
     if (str[0] == '-') {
-        negative = true;
+        this_negative = true;
         start = 1;
     } else if (str[0] == '+') {
         start = 1;
@@ -50,6 +51,7 @@ big_integer::big_integer(std::string const &str) {
         *this = *this * 10 + static_cast<uint32_t>(str[i] - '0');
     }
 
+    negative = this_negative;
     delete_zeroes();
 }
 
