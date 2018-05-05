@@ -92,6 +92,8 @@ big_integer &big_integer::add(big_integer const &rhs) { // Сложение бе
         number.push_back(carry);
     }
 
+    delete_zeroes();
+
     return *this;
 }
 
@@ -161,6 +163,8 @@ big_integer &big_integer::subtraction(big_integer const &rhs) { // Вычита�
         negative ^= 1;
     }
 
+    delete_zeroes();
+
     return *this;
 }
 
@@ -170,6 +174,8 @@ big_integer &big_integer::operator+=(big_integer const &rhs) { // Сложени
     } else {
         subtraction(rhs);
     }
+
+    delete_zeroes();
 
     return *this;
 }
@@ -346,7 +352,11 @@ big_integer &big_integer::operator/=(big_integer const &rhs) {
 big_integer &big_integer::operator%=(big_integer const &rhs) {
     std::pair<big_integer, big_integer> div_and_rem = division_with_remainder(rhs);
 
+    bool this_negative = negative;
     *this = div_and_rem.second;
+    negative = this_negative;
+
+    delete_zeroes();
     return *this;
 }
 
@@ -616,7 +626,7 @@ void big_integer::inc(std::vector<uint32_t>& v) const {
 }
 
 std::vector<uint32_t> big_integer::negate(std::vector<uint32_t> const& v) const {
-    std::vector<uint32_t> ret(v.size() + 1);
+    std::vector<uint32_t> ret(v.size());
 
     for (size_t i = 0; i < v.size(); ++i) {
         ret[i] = ~v[i];
