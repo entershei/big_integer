@@ -269,12 +269,16 @@ void big_integer::shift_subtract(big_integer const &rhs, size_t pos) {
         uint32_t rhs_i = (i - pos < rhs.number.size()) ? rhs.number[i - pos] : 0;
 
         if (number[i] <  rhs_i + borrow) {
-            number[i] = static_cast<uint32_t>(BASE - rhs_i - borrow);
+            number[i] = static_cast<uint32_t>(BASE + number[i] - rhs_i - borrow);
             borrow = 1;
         } else {
             number[i] -= rhs_i + borrow;
             borrow = 0;
         }
+    }
+
+    if (borrow != 0) {
+        --(*this);
     }
 
     delete_zeroes();
@@ -348,6 +352,7 @@ big_integer &big_integer::operator/=(big_integer const &rhs) {
     bool this_negative = negative;
     *this = div_and_rem.first;
     negative = (this_negative != rhs.negative);
+
     return *this;
 }
 
@@ -602,11 +607,26 @@ std::string to_string(big_integer const &a) {
         ret.push_back(big_integer::complement_to_base(std::to_string(quotient.number[0])));
     }
 
+    size_t pos0 = 0;
+    for (size_t i = 0; i < ret.back().size(); ++i) {
+        if (ret.back()[i] == '0') {
+            pos0 = i + 1;
+        } else {
+            break;
+        }
+    }
+
+    ret[ret.size() - 1] = ret[ret.size() - 1].substr(pos0);
+
     std::reverse(ret.begin(), ret.end());
     std::string string_of_big_integer;
 
     for (auto i : ret) {
         string_of_big_integer += i;
+    }
+
+    if (a.negative) {
+        string_of_big_integer = "-" + string_of_big_integer;
     }
 
     return string_of_big_integer;
