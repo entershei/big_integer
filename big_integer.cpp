@@ -24,15 +24,14 @@ uint32_t big_integer::abs_for_int32(int32_t a) {
     return static_cast<uint32_t>(a < 0 ? -a : a);
 }
 
-big_integer::big_integer(int32_t a) {
+big_integer::big_integer(int32_t a) :
+        negative(a < 0) {
     number = {abs_for_int32(a)};
-    negative = a < 0;
 }
 
-big_integer::big_integer(uint32_t a) {
-    number = {a};
-    negative = false;
-}
+big_integer::big_integer(uint32_t a) :
+        number({a}),
+        negative(false) {}
 
 big_integer::big_integer(std::string const &str) {
     size_t start = 0;
@@ -65,11 +64,6 @@ big_integer::big_integer(std::vector<uint32_t> const &a) { //от дополне
     }
 
     delete_zeroes();
-}
-
-void swap(big_integer &a, big_integer &b) {
-    std::swap(a.number, b.number);
-    std::swap(a.negative, b.negative);
 }
 
 void big_integer::small_add(size_t pos, uint64_t add, uint32_t &carry) {
@@ -269,7 +263,7 @@ void big_integer::shift_subtract(big_integer const &rhs, size_t pos) {
     for (i = pos; i < std::min(number.size(), rhs.number.size() + pos); ++i) {
         uint32_t rhs_i = (i - pos < rhs.number.size()) ? rhs.number[i - pos] : 0;
 
-        if (number[i] <  rhs_i + borrow) {
+        if (number[i] < rhs_i + borrow) {
             number[i] = static_cast<uint32_t>(BASE + number[i] - rhs_i - borrow);
             borrow = 1;
         } else {
@@ -290,12 +284,12 @@ void big_integer::shift_subtract(big_integer const &rhs, size_t pos) {
     delete_zeroes();
 }
 
-bool big_integer::shift_leq(big_integer const& rhs, size_t pos) {
+bool big_integer::shift_leq(big_integer const &rhs, size_t pos) {
     if (pos + rhs.number.size() != number.size()) {
         return number.size() > pos + rhs.number.size();
     }
 
-    for (size_t i = number.size(); i-- >  pos;) {
+    for (size_t i = number.size(); i-- > pos;) {
         if (number[i] != rhs.number[i - pos]) {
             return number[i] > rhs.number[i - pos];
         }
@@ -642,7 +636,7 @@ std::ostream &operator<<(std::ostream &s, big_integer const &a) {
     return s << to_string(a);
 }
 
-void big_integer::inc(std::vector<uint32_t>& v) const {
+void big_integer::inc(std::vector<uint32_t> &v) const {
     uint64_t carry = 1;
 
     for (size_t i = 0; i < v.size(); ++i) {
@@ -653,7 +647,7 @@ void big_integer::inc(std::vector<uint32_t>& v) const {
     assert(!carry);
 }
 
-std::vector<uint32_t> big_integer::negate(std::vector<uint32_t> const& v) const {
+std::vector<uint32_t> big_integer::negate(std::vector<uint32_t> const &v) const {
     std::vector<uint32_t> ret(v.size());
 
     for (size_t i = 0; i < v.size(); ++i) {
