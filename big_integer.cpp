@@ -196,7 +196,9 @@ uint32_t big_integer::insert_or_add(size_t pos, uint64_t x) {
 
 big_integer &big_integer::operator*=(big_integer const &rhs) {
     big_integer ret = 0;
-
+    
+    number.resize(number.size() + rhs.number.size());
+    
     for (size_t i = 0; i < rhs.number.size(); ++i) {
         uint32_t carry = 0;
         for (size_t j = 0; j < number.size(); ++j) {

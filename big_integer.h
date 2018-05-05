@@ -68,10 +68,11 @@ struct big_integer {
 
     friend std::string to_string(big_integer const &a);
 
+private:
     //0 - младший бит
     std::vector<uint32_t> number;
     bool negative;
-private:
+
     big_integer(std::vector<uint32_t> const &a);
 
     big_integer &add(big_integer const &rhs);
@@ -113,6 +114,8 @@ private:
     bool shift_leq(big_integer const &rhs, size_t pos);
 
     void small_add(size_t pos, uint64_t add, uint32_t &carry);
+
+    uint32_t str_to_uint32(std::string const& str, size_t pos);
 
     friend bool more_or_equal(big_integer const &a, big_integer const &b);
 };
