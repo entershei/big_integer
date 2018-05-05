@@ -258,19 +258,15 @@ big_integer big_integer::remainder(uint32_t b) {
 void big_integer::shift_subtract(big_integer const &rhs, size_t pos) {
     uint64_t borrow = 0;
     for (size_t i = pos; i < std::min(number.size(), rhs.number.size() + pos); ++i) {
-        uint64_t res = number[i];
+        uint32_t rhs_i = (i - pos < rhs.number.size()) ? rhs.number[i - pos] : 0;
 
-        size_t pos_rhs = (i - pos < rhs.number.size()) ? i - pos : 0;
-
-        if (res <  rhs.number[pos_rhs] + borrow) {
-            res = BASE - rhs.number[pos_rhs] - borrow;
+        if (number[i] <  rhs_i + borrow) {
+            number[i] = static_cast<uint32_t>(BASE - rhs_i - borrow);
             borrow = 1;
         } else {
-            res -= rhs.number[pos_rhs] + borrow;
+            number[i] -= rhs_i + borrow;
             borrow = 0;
         }
-
-        number[i] = static_cast<uint32_t>(res);
     }
 
     delete_zeroes();
@@ -341,8 +337,9 @@ std::pair<big_integer, big_integer> big_integer::division_with_remainder(big_int
 big_integer &big_integer::operator/=(big_integer const &rhs) {
     std::pair<big_integer, big_integer> div_and_rem = division_with_remainder(rhs);
 
+    bool this_negative = negative;
     *this = div_and_rem.first;
-    negative = (negative != rhs.negative);
+    negative = (this_negative != rhs.negative);
     return *this;
 }
 
