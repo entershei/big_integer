@@ -265,7 +265,8 @@ big_integer big_integer::remainder(uint32_t b) {
 
 void big_integer::shift_subtract(big_integer const &rhs, size_t pos) {
     uint64_t borrow = 0;
-    for (size_t i = pos; i < std::min(number.size(), rhs.number.size() + pos); ++i) {
+    size_t i;
+    for (i = pos; i < std::min(number.size(), rhs.number.size() + pos); ++i) {
         uint32_t rhs_i = (i - pos < rhs.number.size()) ? rhs.number[i - pos] : 0;
 
         if (number[i] <  rhs_i + borrow) {
@@ -277,8 +278,13 @@ void big_integer::shift_subtract(big_integer const &rhs, size_t pos) {
         }
     }
 
-    if (borrow != 0) {
-        --(*this);
+    while (borrow != 0) {
+        if (number[i] != 0) {
+            borrow = 0;
+        }
+
+        --number[i];
+        ++i;
     }
 
     delete_zeroes();
