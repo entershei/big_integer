@@ -4,156 +4,163 @@
 #include <cstddef>
 #include <iosfwd>
 #include <vector>
+#include "my_vector.h"
 
-struct big_integer {
-    big_integer();
+namespace big_integer_ns {
+    //using vector = my_vector;
+    using vector = std::vector<uint32_t>;
 
-    big_integer(big_integer const &other) = default;
+    const uint32_t MAX_UINT_32 = std::numeric_limits<uint32_t>::max();
+    const uint64_t BASE = static_cast<uint64_t>(MAX_UINT_32) + 1;
+    const uint32_t SHIFT_32 = 32;
 
-    big_integer(int32_t a);
+    struct big_integer {
+        //static const big_integer MAX_POW_10 = static_cast<uint32_t >(1e9);
 
-    big_integer(uint32_t a);
+        big_integer();
 
-    explicit big_integer(std::string const &str);
+        big_integer(big_integer const &other) = default;
 
-    ~big_integer() = default;
+        big_integer(std::int32_t a);
 
-    big_integer &operator=(big_integer const &other) = default;
+        big_integer(std::uint32_t a);
 
-    big_integer &operator+=(big_integer const &rhs);
+        explicit big_integer(std::string const &str);
 
-    big_integer &operator-=(big_integer const &rhs);
+        ~big_integer() = default;
 
-    big_integer &operator*=(big_integer const &rhs);
+        big_integer &operator=(big_integer const &other) = default;
 
-    big_integer &operator/=(big_integer const &rhs);
+        big_integer &operator+=(big_integer const &rhs);
 
-    big_integer &operator%=(big_integer const &rhs);
+        big_integer &operator-=(big_integer const &rhs);
 
-    big_integer &operator&=(big_integer const &rhs);
+        big_integer &operator*=(big_integer const &rhs);
 
-    big_integer &operator|=(big_integer const &rhs);
+        big_integer &operator/=(big_integer const &rhs);
 
-    big_integer &operator^=(big_integer const &rhs);
+        big_integer &operator%=(big_integer const &rhs);
 
-    big_integer &operator<<=(size_t shift);
+        big_integer &operator&=(big_integer const &rhs);
 
-    big_integer &operator>>=(size_t shift);
+        big_integer &operator|=(big_integer const &rhs);
 
-    big_integer operator+() const;
+        big_integer &operator^=(big_integer const &rhs);
 
-    big_integer operator-() const;
+        big_integer &operator<<=(size_t shift);
 
-    big_integer operator~() const;
+        big_integer &operator>>=(size_t shift);
 
-    big_integer &operator++();
+        big_integer operator+() const;
 
-    big_integer operator++(int);
+        big_integer operator-() const;
 
-    big_integer &operator--();
+        big_integer operator~() const;
 
-    big_integer operator--(int);
+        big_integer &operator++();
 
-    friend bool operator==(big_integer const &a, big_integer const &b);
+        big_integer operator++(int);
 
-    friend bool operator!=(big_integer const &a, big_integer const &b);
+        big_integer &operator--();
 
-    friend bool operator<(big_integer const &a, big_integer const &b);
+        big_integer operator--(int);
 
-    friend bool operator>(big_integer const &a, big_integer const &b);
+        friend bool operator==(big_integer const &a, big_integer const &b);
 
-    friend bool operator<=(big_integer const &a, big_integer const &b);
+        friend bool operator!=(big_integer const &a, big_integer const &b);
 
-    friend bool operator>=(big_integer const &a, big_integer const &b);
+        friend bool operator<(big_integer const &a, big_integer const &b);
 
-    friend std::string to_string(big_integer const &a);
+        friend bool operator>(big_integer const &a, big_integer const &b);
 
-private:
-    //0 - младший бит
-    std::vector<uint32_t> number;
-    bool negative;
+        friend bool operator<=(big_integer const &a, big_integer const &b);
 
-    big_integer(std::vector<uint32_t> const &a);
+        friend bool operator>=(big_integer const &a, big_integer const &b);
 
-    big_integer &add(big_integer const &rhs);
+        friend std::string to_string(big_integer const &a);
 
-    big_integer &subtraction_larger(big_integer const &rhs);
+    private:
+        vector number;
+        bool negative;
 
-    big_integer &subtraction_less(big_integer const &rhs);
+        explicit big_integer(std::vector<std::uint32_t> const &a);
 
-    big_integer &subtraction(big_integer const &rhs);
+        big_integer &add(big_integer const &rhs);
 
-    big_integer normalization(big_integer const &a);
+        big_integer &subtraction_larger(big_integer const &rhs);
 
-    big_integer quotient(uint32_t b);
+        big_integer &subtraction_less(big_integer const &rhs);
 
-    big_integer remainder(uint32_t rhs);
+        big_integer &subtraction(big_integer const &rhs);
 
-    big_integer &delete_zeroes();
+        big_integer quotient(std::uint32_t b);
 
-    static std::string complement_to_base(std::string s);
+        big_integer remainder(std::uint32_t rhs);
 
-    uint32_t bin_search(big_integer const &rhs, size_t pos);
+        big_integer &delete_zeroes();
 
-    std::pair<big_integer, big_integer> division_with_remainder(big_integer const &rhs);
+        static std::string complement_to_base(std::string s);
 
-    std::pair<big_integer, big_integer> long_division(big_integer const &rhs);
+        std::uint32_t bin_search(big_integer const &rhs, size_t pos);
 
-    uint32_t abs_for_int32(int32_t a);
+        std::pair<big_integer, big_integer> division_with_remainder(big_integer const &rhs);
 
-    uint32_t insert_or_add(size_t pos, uint64_t x);
+        std::pair<big_integer, big_integer> long_division(big_integer const &rhs);
 
-    std::vector<uint32_t> negate(std::vector<uint32_t> const &v) const;
+        std::uint32_t abs_for_int32(std::int32_t a);
 
-    void inc(std::vector<uint32_t> &v) const;
+        std::uint32_t insert_or_add(size_t pos, uint64_t x);
 
-    std::vector<uint32_t> get_twos_complement(size_t size) const;
+        std::vector<std::uint32_t> negate(std::vector<std::uint32_t> const &v) const;
 
-    void shift_subtract(big_integer const &rhs, size_t pos);
+        void inc(std::vector<std::uint32_t> &v) const;
 
-    bool shift_leq(big_integer const &rhs, size_t pos);
+        std::vector<std::uint32_t> get_twos_complement(size_t size) const;
 
-    void small_add(size_t pos, uint64_t add, uint32_t &carry);
+        void shift_subtract(big_integer const &rhs, size_t pos);
 
-    uint32_t str_to_uint32(std::string const& str, size_t pos);
+        bool shift_leq(big_integer const &rhs, size_t pos);
 
-    friend bool more_or_equal(big_integer const &a, big_integer const &b);
-};
+        void small_add(size_t pos, uint64_t add, std::uint32_t &carry);
 
-big_integer operator+(big_integer a, big_integer const &b);
+        static bool more_or_equal(big_integer const &a, big_integer const &b);
+    };
 
-big_integer operator-(big_integer a, big_integer const &b);
+    big_integer operator+(big_integer a, big_integer const &b);
 
-big_integer operator*(big_integer a, big_integer const &b);
+    big_integer operator-(big_integer a, big_integer const &b);
 
-big_integer operator/(big_integer a, big_integer const &b);
+    big_integer operator*(big_integer a, big_integer const &b);
 
-big_integer operator%(big_integer a, big_integer const &b);
+    big_integer operator/(big_integer a, big_integer const &b);
 
-big_integer operator&(big_integer a, big_integer const &b);
+    big_integer operator%(big_integer a, big_integer const &b);
 
-big_integer operator|(big_integer a, big_integer const &b);
+    big_integer operator&(big_integer a, big_integer const &b);
 
-big_integer operator^(big_integer a, big_integer const &b);
+    big_integer operator|(big_integer a, big_integer const &b);
 
-big_integer operator<<(big_integer a, int b);
+    big_integer operator^(big_integer a, big_integer const &b);
 
-big_integer operator>>(big_integer a, int b);
+    big_integer operator<<(big_integer a, int b);
 
-bool operator==(big_integer const &a, big_integer const &b);
+    big_integer operator>>(big_integer a, int b);
 
-bool operator!=(big_integer const &a, big_integer const &b);
+    bool operator==(big_integer const &a, big_integer const &b);
 
-bool operator<(big_integer const &a, big_integer const &b);
+    bool operator!=(big_integer const &a, big_integer const &b);
 
-bool operator>(big_integer const &a, big_integer const &b);
+    bool operator<(big_integer const &a, big_integer const &b);
 
-bool operator<=(big_integer const &a, big_integer const &b);
+    bool operator>(big_integer const &a, big_integer const &b);
 
-bool operator>=(big_integer const &a, big_integer const &b);
+    bool operator<=(big_integer const &a, big_integer const &b);
 
-std::string to_string(big_integer const &a);
+    bool operator>=(big_integer const &a, big_integer const &b);
 
-std::ostream &operator<<(std::ostream &s, big_integer const &a);
+    std::string to_string(big_integer const &a);
+
+    std::ostream &operator<<(std::ostream &s, big_integer const &a);
+}
 
 #endif // BIG_INTEGER_H
