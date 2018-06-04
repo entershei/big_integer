@@ -7,8 +7,8 @@
 #include "my_vector.h"
 
 namespace big_integer_ns {
-    //using vector = my_vector;
-    using vector = std::vector<uint32_t>;
+    using vector_t = my_vector;
+    //using vector = std::vector<uint32_t>;
 
     const uint32_t MAX_UINT_32 = std::numeric_limits<uint32_t>::max();
     const uint64_t BASE = static_cast<uint64_t>(MAX_UINT_32) + 1;
@@ -80,10 +80,10 @@ namespace big_integer_ns {
         friend std::string to_string(big_integer const &a);
 
     private:
-        vector number;
+        vector_t number;
         bool negative;
 
-        explicit big_integer(std::vector<std::uint32_t> const &a);
+        explicit big_integer(vector_t const &a);
 
         big_integer &add(big_integer const &rhs);
 
@@ -111,11 +111,11 @@ namespace big_integer_ns {
 
         std::uint32_t insert_or_add(size_t pos, uint64_t x);
 
-        std::vector<std::uint32_t> negate(std::vector<std::uint32_t> const &v) const;
+        vector_t negate(vector_t const &v) const;
 
-        void inc(std::vector<std::uint32_t> &v) const;
+        void inc(vector_t &v) const;
 
-        std::vector<std::uint32_t> get_twos_complement(size_t size) const;
+        vector_t get_twos_complement(size_t size) const;
 
         void shift_subtract(big_integer const &rhs, size_t pos);
 

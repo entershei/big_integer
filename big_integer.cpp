@@ -59,7 +59,7 @@ namespace big_integer_ns {
         delete_zeroes();
     }
 
-    big_integer::big_integer(vector const &a) { //от дополнения до 2ки
+    big_integer::big_integer(vector_t const &a) { //от дополнения до 2ки
         if (a.back() == 0) {
             number = a;
             negative = false;
@@ -207,7 +207,7 @@ namespace big_integer_ns {
         for (size_t i = 0; i < rhs.number.size(); ++i) {
             uint32_t carry = 0;
             for (size_t j = 0; j < number.size(); ++j) {
-                uint64_t mul = static_cast<uint64_t >(rhs.number[i]) * number[j];
+                uint64_t mul = static_cast<uint64_t>(rhs.number[i]) * number[j];
                 carry = ret.insert_or_add(i + j, mul + carry);
             }
             if (carry != 0) {
@@ -374,8 +374,8 @@ namespace big_integer_ns {
         return *this;
     }
 
-    vector big_integer::get_twos_complement(size_t size) const {
-        vector ret = number;
+    vector_t big_integer::get_twos_complement(size_t size) const {
+        vector_t ret = number;
         ret.resize(size, 0);
 
         if (!negative) {
@@ -387,8 +387,8 @@ namespace big_integer_ns {
 
     big_integer &big_integer::operator&=(big_integer const &rhs) {
         size_t size = std::max(number.size(), rhs.number.size()) + 1;
-        vector a = get_twos_complement(size);
-        vector b = rhs.get_twos_complement(size);
+        vector_t a = get_twos_complement(size);
+        vector_t b = rhs.get_twos_complement(size);
 
         for (size_t i = 0; i < size; ++i) {
             a[i] &= b[i];
@@ -400,8 +400,8 @@ namespace big_integer_ns {
 
     big_integer &big_integer::operator|=(big_integer const &rhs) {
         size_t size = std::max(number.size(), rhs.number.size()) + 1;
-        vector a = get_twos_complement(size);
-        vector b = rhs.get_twos_complement(size);
+        vector_t a = get_twos_complement(size);
+        vector_t b = rhs.get_twos_complement(size);
 
         for (size_t i = 0; i < size; ++i) {
             a[i] |= b[i];
@@ -413,8 +413,8 @@ namespace big_integer_ns {
 
     big_integer &big_integer::operator^=(big_integer const &rhs) {
         size_t size = std::max(number.size(), rhs.number.size()) + 1;
-        vector a = get_twos_complement(size);
-        vector b = rhs.get_twos_complement(size);
+        vector_t a = get_twos_complement(size);
+        vector_t b = rhs.get_twos_complement(size);
 
         for (size_t i = 0; i < size; ++i) {
             a[i] ^= b[i];
@@ -426,7 +426,7 @@ namespace big_integer_ns {
 
     big_integer big_integer::operator~() const {
         size_t size = number.size() + 1;
-        vector a = get_twos_complement(size);
+        vector_t a = get_twos_complement(size);
 
         for (size_t i = 0; i < a.size(); ++i) {
             a[i] = ~a[i];
@@ -436,9 +436,9 @@ namespace big_integer_ns {
     }
 
     big_integer &big_integer::operator<<=(size_t shift) {
-        vector a = get_twos_complement(number.size() + 1);
+        vector_t a = get_twos_complement(number.size() + 1);
 
-        vector ret(a.size() + (shift + SHIFT_32 - 1) / SHIFT_32, 0);
+        vector_t ret(a.size() + (shift + SHIFT_32 - 1) / SHIFT_32, 0);
         for (size_t i = shift / SHIFT_32; i < ret.size(); ++i) {
             if (i - shift / SHIFT_32 < a.size()) {
                 ret[i] = a[i - shift / SHIFT_32];
@@ -462,9 +462,9 @@ namespace big_integer_ns {
     }
 
     big_integer &big_integer::operator>>=(size_t shift) {
-        vector a = get_twos_complement(number.size() + 1);
+        vector_t a = get_twos_complement(number.size() + 1);
 
-        vector ret(a.size() - shift / SHIFT_32, 0);
+        vector_t ret(a.size() - shift / SHIFT_32, 0);
 
         for (size_t i = ret.size(); i-- > 0;) {
             if (i + shift / SHIFT_32 < a.size()) {
@@ -643,7 +643,7 @@ namespace big_integer_ns {
         return s << to_string(a);
     }
 
-    void big_integer::inc(vector &v) const {
+    void big_integer::inc(vector_t &v) const {
         uint64_t carry = 1;
 
         for (size_t i = 0; i < v.size(); ++i) {
@@ -654,8 +654,8 @@ namespace big_integer_ns {
         assert(!carry);
     }
 
-    vector big_integer::negate(vector const &v) const {
-        vector ret(v.size());
+    vector_t big_integer::negate(vector_t const &v) const {
+        vector_t ret(v.size());
 
         for (size_t i = 0; i < v.size(); ++i) {
             ret[i] = ~v[i];
