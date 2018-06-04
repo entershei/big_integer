@@ -10,12 +10,16 @@ add_executable(big_integer_testing
         big_integer.cpp
         gtest/gtest-all.cc
         gtest/gtest.h
-        gtest/gtest_main.cc)
+        gtest/gtest_main.cc
+        my_vector.cpp
+        my_vector.h)
 
 add_executable(MyIrinasSetup
         big_integer.h
         big_integer.cpp
-        mytestik.cpp)
+        mytestik.cpp
+        my_vector.cpp
+        my_vector.h)
 
 
 if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
