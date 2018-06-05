@@ -15,8 +15,6 @@ namespace big_integer_ns {
     const uint32_t SHIFT_32 = 32;
 
     struct big_integer {
-        //static const big_integer MAX_POW_10 = static_cast<uint32_t >(1e9);
-
         big_integer();
 
         big_integer(big_integer const &other) = default;
