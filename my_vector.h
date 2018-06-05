@@ -175,7 +175,6 @@ private:
     void make_unique() {
         if (!small()) {
             if (!large_value.unique()) {
-                //--(*large_value.counter);
                 large_value = large_type(large_value.data, large_value.capacity, large_value.capacity);
             }
         }

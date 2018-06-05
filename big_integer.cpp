@@ -260,7 +260,7 @@ namespace big_integer_ns {
             carry = (carry * BASE + number[i]) % b;
         }
 
-        ret = static_cast<uint32_t >(carry);
+        ret = static_cast<uint32_t>(carry);
         return ret;
     }
 
@@ -628,12 +628,13 @@ namespace big_integer_ns {
         std::reverse(ret.begin(), ret.end());
         std::string string_of_big_integer;
 
-        for (auto i : ret) {
-            string_of_big_integer += i;
+        if (a.negative) {
+            string_of_big_integer = "-";
         }
 
-        if (a.negative) {
-            string_of_big_integer = "-" + string_of_big_integer;
+
+        for (auto i : ret) {
+            string_of_big_integer += i;
         }
 
         return string_of_big_integer;

@@ -61,16 +61,16 @@ void my_vector::swap(my_vector &b) {
         small_type last_small;
         std::copy(begin(), end(), last_small);
         new(&large_value) large_type(b.large_value);
-        std::copy(last_small, last_small + size_small_type, b.begin());
+        std::copy(last_small, last_small + size(), b.begin());
         is_small = false;
-        b.is_small = true;
+        b.is_small = false;
     } else {
         small_type last_small;
         std::copy(b.begin(), b.end(), last_small);
         new(&b.large_value) large_type(large_value);
-        std::copy(last_small, last_small + size_small_type, begin());
+        std::copy(last_small, last_small + b.size(), begin());
         b.is_small = false;
-        is_small = true;
+        is_small = false;
     }
     swap(size_, b.size_);
 }
