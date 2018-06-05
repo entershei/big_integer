@@ -15,7 +15,7 @@ namespace big_integer_ns {
     using std::uint64_t;
     using std::int64_t;
 
-    const big_integer MAX_POW_10 = static_cast<uint32_t >(1e9);
+    const big_integer MAX_POW_10 = static_cast<uint32_t>(1e9);
 
     big_integer::big_integer() :
             number({0}),

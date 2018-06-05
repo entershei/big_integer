@@ -180,8 +180,6 @@ private:
             }
         }
     }
-
-    void equate_small_type(small_type const &other, size_t new_size);
 };
 
 bool operator==(my_vector const &a, my_vector const &b);

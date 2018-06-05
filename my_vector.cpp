@@ -80,12 +80,6 @@ my_vector &my_vector::operator=(my_vector other) {
     return *this;
 }
 
-void my_vector::equate_small_type(small_type const &other, size_t new_size) {
-    for (size_t i = 0; i < new_size; ++i) {
-        small_value[i] = other[i];
-    }
-}
-
 void my_vector::resize(size_t new_size, value_type val) {
     if (small()) {
         if (new_size > size_small_type) {
