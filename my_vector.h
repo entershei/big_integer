@@ -43,11 +43,12 @@ struct large_type {
 
     ~large_type() {
         --(*counter);
-        std::cerr << data << " " << counter << " " << *counter << std::endl;
 
         if (*counter == 0) {
             delete counter;
+            counter = nullptr;
             delete[] data;
+            data = nullptr;
         }
     }
 
@@ -174,7 +175,7 @@ private:
     void make_unique() {
         if (!small()) {
             if (!large_value.unique()) {
-                --(*large_value.counter);
+                //--(*large_value.counter);
                 large_value = large_type(large_value.data, large_value.capacity, large_value.capacity);
             }
         }
