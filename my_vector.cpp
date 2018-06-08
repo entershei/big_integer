@@ -29,21 +29,21 @@ my_vector::~my_vector() {
 }
 
 value_type my_vector::operator[](size_t ind) const {
-    assert(ind < size() && "[i], but i < size()");
+    //assert(ind < size() && "[i], but i < size()");
     return *(data() + ind);
 }
 
 value_type &my_vector::operator[](size_t ind) {
-    assert(ind < size() && "[i], but i < size()");
+    //assert(ind < size() && "[i], but i < size()");
     return *(data() + ind);
 }
 
 value_type &my_vector::back() {
-    return this->operator[](size() - 1);
+    return *(data() + size_ - 1);
 }
 
 value_type my_vector::back() const {
-    return this->operator[](size() - 1);
+    return *(data() + size_ - 1);
 }
 
 size_t my_vector::size() const {
@@ -53,11 +53,11 @@ size_t my_vector::size() const {
 void my_vector::swap(my_vector &b) {
     using std::swap;
 
-    if (small() && b.small()) {
+    if (is_small && b.is_small) {
         swap(small_value, b.small_value);
-    } else if (!small() && !b.small()) {
+    } else if (!is_small && !b.is_small) {
         large_value.swap(b.large_value);
-    } else if (small() && !b.small()) {
+    } else if (is_small && !b.is_small) {
         small_type last_small;
         std::copy(begin(), end(), last_small);
         new(&large_value) large_type(b.large_value);
@@ -81,58 +81,46 @@ my_vector &my_vector::operator=(my_vector other) {
 }
 
 void my_vector::resize(size_t new_size, value_type val) {
-    if (small()) {
+    if (is_small) {
         if (new_size > size_small_type) {
             small_type last_data;
             std::copy(begin(), end(), last_data);
             is_small = false;
             new(&large_value) large_type(new_size, val);
 
-            std::copy(last_data, last_data + size(), large_value.data);
+            std::copy(last_data, last_data + size_, large_value.data);
         } else {
-            if (new_size > size()) {
-                std::fill_n(small_value + size(), new_size - size(), val);
+            if (new_size > size_) {
+                std::fill_n(small_value + size_, new_size - size_, val);
             }
         }
     } else {
         make_unique();
+
         large_value.resize(new_size);
-        std::fill_n(begin() + size(), std::max(new_size, size()) - size(), val);
+        std::fill_n(begin() + size_, std::max(new_size, size_) - size_, val);
     }
 
     size_ = new_size;
 }
 
 value_type my_vector::pop_back() {
-    assert(size() > 0 && "pop_back(), but size_ = 0");
+    //assert(size_ > 0 && "pop_back(), but size_ = 0");
 
     value_type res = back();
 
-    resize(size() - 1);
+    size_ -= 1;
     return res;
 }
 
 void my_vector::push_back(value_type val) {
-    resize(size() + 1, val);
-}
-
-my_vector &my_vector::copy_of_std_vector(std::vector<value_type> const &other) {
-    make_unique();
-    resize(other.size());
-
-    if (small()) {
-        for (size_t i = 0; i < size(); ++i) {
-            small_value[i] = other[i];
-        }
-    } else {
-        for (size_t i = 0; i < size(); ++i) {
-            large_value[i] = other[i];
-        }
-    }
-
-    return *this;
+    resize(size_ + 1, val);
 }
 
 bool operator==(my_vector const &a, my_vector const &b) {
     return std::equal(a.begin(), a.end(), b.begin(), b.end());
+}
+
+void swap(my_vector& a, my_vector& b) {
+    a.swap(b);
 }

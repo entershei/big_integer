@@ -7,8 +7,8 @@
 #include "my_vector.h"
 
 namespace big_integer_ns {
-    //using vector_t = my_vector;
-    using vector_t = std::vector<uint32_t>;
+    using vector_t = my_vector;
+    //using vector_t = std::vector<uint32_t>;
 
     const uint32_t MAX_UINT_32 = std::numeric_limits<uint32_t>::max();
     const uint64_t BASE = static_cast<uint64_t>(MAX_UINT_32) + 1;
@@ -34,6 +34,8 @@ namespace big_integer_ns {
         big_integer &operator-=(big_integer const &rhs);
 
         big_integer &operator*=(big_integer const &rhs);
+
+        big_integer &operator*=(int val);
 
         big_integer &operator/=(big_integer const &rhs);
 

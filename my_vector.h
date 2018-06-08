@@ -46,9 +46,7 @@ struct large_type {
 
         if (*counter == 0) {
             delete counter;
-            counter = nullptr;
             delete[] data;
-            data = nullptr;
         }
     }
 
@@ -70,11 +68,13 @@ struct large_type {
         return *(data + index);
     }
 
-    void resize(size_t new_size) { //new_size > size_small_type
+    void resize(size_t new_size) { //останется large_type
         if (new_size > capacity) {
-            value_type *cur = new value_type[new_size * 2];
+            const size_t mul = 1;
+            new_size = std::max(capacity * 2, new_size);
+            auto *cur = new value_type[new_size * mul];
             std::copy(data, data + capacity, cur);
-            capacity = new_size * 2;
+            capacity = new_size * mul;
             std::swap(data, cur);
             delete[] cur;
         }
@@ -98,7 +98,7 @@ struct my_vector {
 
     my_vector(std::initializer_list<value_type> other);
 
-    my_vector(size_t size, value_type value = 0);
+    explicit my_vector(size_t size, value_type value = 0);
 
     ~my_vector();
 
@@ -121,8 +121,6 @@ struct my_vector {
     void push_back(value_type val);
 
     void swap(my_vector &b);
-
-    my_vector &copy_of_std_vector(std::vector<value_type> const &other);
 
     const_pointer data() const {
         if (small()) {
@@ -158,6 +156,8 @@ struct my_vector {
         return begin() + size();
     }
 
+    friend void swap(my_vector& a, my_vector& b);
+
 private:
     union {
         small_type small_value;
@@ -182,5 +182,7 @@ private:
 };
 
 bool operator==(my_vector const &a, my_vector const &b);
+
+void swap(my_vector& a, my_vector& b);
 
 #endif //BIGINT_OPTVECTOR_H

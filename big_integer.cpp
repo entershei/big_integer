@@ -52,7 +52,8 @@ namespace big_integer_ns {
         }
 
         for (size_t i = start; i < str.size(); ++i) {
-            *this = *this * 10 + static_cast<uint32_t>(str[i] - '0');
+            operator*=(10);
+            operator+=(static_cast<uint32_t>(str[i] - '0'));
         }
 
         negative = this_negative;
@@ -191,39 +192,42 @@ namespace big_integer_ns {
         return *this;
     }
 
-    uint32_t big_integer::insert_or_add(size_t pos, uint64_t x) {
-        number.resize(std::max(number.size(), pos + 1), 0);
-
-        uint64_t ret = number[pos] + x;
-        number[pos] = static_cast<uint32_t >(ret & MAX_UINT_32);
-        return static_cast<uint32_t>(ret >> SHIFT_32);
-    }
-
-    big_integer &big_integer::operator*=(big_integer const &rhs) {
-        big_integer ret = 0;
-
-        number.resize(number.size() + rhs.number.size());
-
-        for (size_t i = 0; i < rhs.number.size(); ++i) {
-            uint32_t carry = 0;
-            for (size_t j = 0; j < number.size(); ++j) {
-                uint64_t mul = static_cast<uint64_t>(rhs.number[i]) * number[j];
-                carry = ret.insert_or_add(i + j, mul + carry);
-            }
-            if (carry != 0) {
-                carry = ret.insert_or_add(i + number.size(), carry);
-                assert(carry == 0);
-            }
+    big_integer &big_integer::operator*=(int val) {
+        negative ^= (val < 0);
+        val = abs(val);
+        uint32_t carry = 0;
+        for (size_t i = 0; i < number.size(); ++i) {
+            uint64_t mul = static_cast<uint64_t>(number[i]) * val + carry;
+            number[i] = static_cast<uint32_t>(mul & MAX_UINT_32);
+            carry = static_cast<uint32_t>(mul >> SHIFT_32);
         }
-
-        ret.negative = negative ^ rhs.negative;
-        ret.delete_zeroes();
-
-        *this = ret;
-
+        if (carry) {
+            number.push_back(carry);
+        }
+        delete_zeroes();
         return *this;
     }
 
+    big_integer &big_integer::operator*=(big_integer const &rhs) {
+        vector_t res(number.size() + rhs.number.size());
+        for (size_t i = 0; i < rhs.number.size(); ++i) {
+            uint32_t carry = 0;
+            for (size_t j = 0; j < number.size(); ++j) {
+                uint64_t mul = static_cast<uint64_t>(rhs.number[i]) * number[j] + carry + res[i + j];
+                res[i + j] = static_cast<uint32_t>(mul & MAX_UINT_32);
+                carry = static_cast<uint32_t>(mul >> SHIFT_32);
+            }
+            if (carry != 0) {
+                res[i + number.size()] += carry;
+            }
+        }
+
+        negative ^= rhs.negative;
+        swap(number, res);
+        delete_zeroes();
+
+        return *this;
+    }
 
     big_integer &big_integer::delete_zeroes() {
         while (number.size() > 1 && number.back() == 0) {
@@ -340,7 +344,7 @@ namespace big_integer_ns {
 
     std::pair<big_integer, big_integer> big_integer::division_with_remainder(big_integer const &rhs) {
         if (rhs.number.size() == 1) {
-            assert(rhs.number.back() != 0);
+            //assert(rhs.number.back() != 0);
 
             return {quotient(rhs.number.back()), remainder(rhs.number.back())};
         } else {
@@ -652,7 +656,7 @@ namespace big_integer_ns {
             v[i] = static_cast<uint32_t>(res & MAX_UINT_32);
             carry = static_cast<uint32_t>(res >> SHIFT_32);
         }
-        assert(!carry);
+        //assert(!carry);
     }
 
     vector_t big_integer::negate(vector_t const &v) const {
