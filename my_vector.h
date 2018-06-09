@@ -116,11 +116,9 @@ struct my_vector {
 
     value_type back() const;
 
-    value_type pop_back();
+    void pop_back();
 
     void push_back(value_type val);
-
-    void swap(my_vector &b);
 
     const_pointer data() const {
         if (small()) {

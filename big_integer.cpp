@@ -257,15 +257,13 @@ namespace big_integer_ns {
     }
 
     big_integer big_integer::remainder(uint32_t b) {
-        big_integer ret = 0;
         uint64_t carry = 0;
 
         for (size_t i = number.size(); i-- > 0;) {
             carry = (carry * BASE + number[i]) % b;
         }
 
-        ret = static_cast<uint32_t>(carry);
-        return ret;
+        return static_cast<uint32_t>(carry);
     }
 
     void big_integer::shift_subtract(big_integer const &rhs, size_t pos) {

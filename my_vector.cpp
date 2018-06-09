@@ -29,12 +29,10 @@ my_vector::~my_vector() {
 }
 
 value_type my_vector::operator[](size_t ind) const {
-    //assert(ind < size() && "[i], but i < size()");
     return *(data() + ind);
 }
 
 value_type &my_vector::operator[](size_t ind) {
-    //assert(ind < size() && "[i], but i < size()");
     return *(data() + ind);
 }
 
@@ -50,33 +48,31 @@ size_t my_vector::size() const {
     return size_;
 }
 
-void my_vector::swap(my_vector &b) {
+void swap(my_vector &a, my_vector &b) {
     using std::swap;
 
-    if (is_small && b.is_small) {
-        swap(small_value, b.small_value);
-    } else if (!is_small && !b.is_small) {
-        large_value.swap(b.large_value);
-    } else if (is_small && !b.is_small) {
+    if (a.is_small && b.is_small) {
+        swap(a.small_value, b.small_value);
+    } else if (!a.is_small && !b.is_small) {
+        a.large_value.swap(b.large_value);
+    } else if (a.is_small && !b.is_small) {
         small_type last_small;
-        std::copy(begin(), end(), last_small);
-        new(&large_value) large_type(b.large_value);
-        std::copy(last_small, last_small + size(), b.begin());
-        is_small = false;
-        b.is_small = false;
+        std::copy(a.begin(), a.end(), last_small);
+        new(&a.large_value) large_type(b.large_value);
+        std::copy(last_small, last_small + a.size_, b.begin());
+        a.is_small = b.is_small = false;
     } else {
         small_type last_small;
         std::copy(b.begin(), b.end(), last_small);
-        new(&b.large_value) large_type(large_value);
-        std::copy(last_small, last_small + b.size(), begin());
-        b.is_small = false;
-        is_small = false;
+        new(&b.large_value) large_type(a.large_value);
+        std::copy(last_small, last_small + b.size(), a.begin());
+        a.is_small = b.is_small = false;
     }
-    swap(size_, b.size_);
+    swap(a.size_, b.size_);
 }
 
 my_vector &my_vector::operator=(my_vector other) {
-    this->swap(other);
+    swap(*this, other);
     return *this;
 }
 
@@ -104,13 +100,8 @@ void my_vector::resize(size_t new_size, value_type val) {
     size_ = new_size;
 }
 
-value_type my_vector::pop_back() {
-    //assert(size_ > 0 && "pop_back(), but size_ = 0");
-
-    value_type res = back();
-
-    size_ -= 1;
-    return res;
+void my_vector::pop_back() {
+    --size_;
 }
 
 void my_vector::push_back(value_type val) {
@@ -119,8 +110,4 @@ void my_vector::push_back(value_type val) {
 
 bool operator==(my_vector const &a, my_vector const &b) {
     return std::equal(a.begin(), a.end(), b.begin(), b.end());
-}
-
-void swap(my_vector& a, my_vector& b) {
-    a.swap(b);
 }
