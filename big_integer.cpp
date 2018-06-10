@@ -212,6 +212,8 @@ namespace big_integer_ns {
         vector_t res(number.size() + rhs.number.size());
         for (size_t i = 0; i < rhs.number.size(); ++i) {
             uint32_t carry = 0;
+            //todo вынести data
+                    //
             for (size_t j = 0; j < number.size(); ++j) {
                 uint64_t mul = static_cast<uint64_t>(rhs.number[i]) * number[j] + carry + res[i + j];
                 res[i + j] = static_cast<uint32_t>(mul & MAX_UINT_32);

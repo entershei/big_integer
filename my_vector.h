@@ -21,7 +21,12 @@ struct large_type {
     large_type() : counter(new size_t(1)), data(nullptr), capacity(0) {}
 
     explicit large_type(size_t capacity) : counter(new size_t(1)), capacity(capacity) {
-        data = new value_type[capacity];
+        try {
+            data = new value_type[capacity];
+        } catch (...) {
+            delete counter;
+            throw;
+        }
     }
 
     large_type(size_t capacity, value_type val) : large_type(capacity) {
