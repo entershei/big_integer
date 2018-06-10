@@ -31,6 +31,7 @@ int main(int argc, char **argv) {
         output = std::ofstream(argv[3], std::ios_base::binary | std::ios_base::out);
     } else {
         output = std::ofstream(std::string(argv[2]) + ".out", std::ios_base::binary | std::ios_base::out);
+        std::cout << std::string(argv[2]) + ".out\n";
     }
 
     if (std::strcmp(argv[1], "-c") == 0) {

@@ -4,6 +4,21 @@ project(big-integer)
 
 include_directories(.)
 
+add_executable(Compression_of_Huffman main.cpp)
+add_executable(Compression_of_Huffman_testing
+        lib/compression.cpp
+        lib/compression.h
+        test/test.cpp
+        gtest/gtest.h
+        gtest/gtest-all.cc
+        gtest/gtest_main.cc
+        )
+
+add_library(compression SHARED lib/compression.h lib/compression.cpp)
+
+target_link_libraries(Compression_of_Huffman compression)
+target_link_libraries(Compression_of_Huffman_testing compression -lpthread)
+
 add_executable(big_integer_testing
         big_integer_testing.cpp
         big_integer.h
